@@ -1,5 +1,7 @@
 import flatpickr from "flatpickr";
+import iziToast from 'izitoast';
 import "flatpickr/dist/flatpickr.min.css";
+import 'izitoast/dist/css/iziToast.min.css';
 
 const startButton = document.querySelector('[data-start]');
 const options = {
@@ -17,6 +19,7 @@ const hours = document.querySelector('[data-hours]');
 const minutes = document.querySelector('[data-minutes]');
 const seconds = document.querySelector('[data-seconds]');
 let ref = null;
+const input = document.getElementById('datetime-picker');
 
 flatpickr('#datetime-picker', options);
 
@@ -28,7 +31,12 @@ function setDate(date) {
   }
 
   if (Date.parse(date) < Date.parse(new Date())) {
-    alert('Please choose a date in the future');
+    iziToast.error({
+      title: 'Fail',
+      message: `Please choose a date in the future`,
+      position: 'topCenter',
+      timeout: 15000,
+    });
     return;
   }
 
@@ -61,16 +69,19 @@ function addLeadingZero(value) {
 
 startButton?.addEventListener('click', () => {
   startButton?.setAttribute('disabled', true);
+  input?.setAttribute('disabled', true);
   ref = setInterval(() => {
     const timeDiff = Date.parse(selectedDate) - Date.parse(new Date());
 
     if (timeDiff <= 0) {
       clearInterval(ref);
+      startButton?.removeAttribute('disabled');
+      input?.removeAttribute('disabled');
     }
 
     seconds.innerHTML = addLeadingZero(convertMs(timeDiff).seconds);
     minutes.innerHTML = addLeadingZero(convertMs(timeDiff).minutes);
     hours.innerHTML = addLeadingZero(convertMs(timeDiff).hours);
-    days.innerHTML = convertMs(timeDiff).days;
+    days.innerHTML = addLeadingZero(convertMs(timeDiff).days);
   }, 1000);
 });
